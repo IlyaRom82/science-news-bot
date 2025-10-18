@@ -1,25 +1,26 @@
 # test_news_bot.py
 import logging
-import requests
+import os
+from dotenv import load_dotenv
 from bs4 import BeautifulSoup
+import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
-
-# ===== Настройка логов =====
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler,
+    ContextTypes,
 )
-logger = logging.getLogger(__name__)
-
 # ===== Токен бота =====
 TOKEN = "8258197340:AAG1z4Bfcs6AhL7sWMXTREYvSlQFdDos7i8"
 
 # ===== User-Agent для обхода защиты сайтов =====
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0"
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/138.0.0.0 Safari/537.36 OPR/122.0.0.0"
+    )
 }
 
 # ===== Функция для парсинга новостей =====
@@ -79,15 +80,16 @@ async def news_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await query.message.reply_text("Не удалось найти новости.")
 
-# ===== Главная функция =====
+# ===== Точка входа =====
 if __name__ == "__main__":
+    # Создаём приложение
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # добавление всех хэндлеров
+    # Добавляем хэндлеры
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("news", news))
     app.add_handler(CallbackQueryHandler(news_button, pattern="news"))
 
     print("Бот запущен. Ctrl+C для остановки.")
+    # Запуск polling без asyncio.run()
     app.run_polling(drop_pending_updates=True)
-
